@@ -7,6 +7,8 @@ import java.util.stream.Stream;
 
 public final class FileReader {
 
+    private static String DELIMITER = "ç";
+
     public static void readFiles() {
         final String fileName = "c://lines.txt";
 

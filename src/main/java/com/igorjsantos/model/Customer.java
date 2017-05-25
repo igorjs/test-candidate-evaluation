@@ -1,16 +1,19 @@
 package com.igorjsantos.model;
 
+import com.igorjsantos.domain.DataType;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
 @Getter
-@Setter
-@NoArgsConstructor
 @AllArgsConstructor
-@ToString
 public class Customer {
 
+    private final DataType id;
+
+    private final String cnpj;
+
+    private final String name;
+
+    private final String bussinesArea;
 }
