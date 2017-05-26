@@ -49,10 +49,9 @@ public final class AnalyzerServiceImpl implements AnalyzerService {
                     @SuppressWarnings("unchecked")
                     final WatchEvent<Path> ev = (WatchEvent<Path>) event;
 
-                    if (event.kind() == StandardWatchEventKinds.ENTRY_CREATE &&
+                    if (event.kind() == StandardWatchEventKinds.ENTRY_CREATE ||
                             event.kind() == StandardWatchEventKinds.ENTRY_MODIFY)
                         onFileEvent(ev.context());
-
                 }
 
                 if (!key.reset())

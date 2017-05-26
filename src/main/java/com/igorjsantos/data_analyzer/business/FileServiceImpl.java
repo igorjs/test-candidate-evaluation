@@ -27,10 +27,8 @@ public class FileServiceImpl implements FileService {
             final String fileName = filename.getFileName().toString();
             final String fileExtension = FilenameUtils.getExtension(fileName);
 
-            return !ApplicationConfig
-                    .getAllowedExtensions()
-                    .stream()
-                    .anyMatch(ext -> ext.equals(fileExtension));
+            return ApplicationConfig.getAllowedExtensions().stream()
+                    .filter(ext -> ext.equals(fileExtension)).count() > 0;
         }
 
         return true;
