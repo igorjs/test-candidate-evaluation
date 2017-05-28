@@ -27,18 +27,12 @@ public class DataServiceImpl implements DataService {
 
     private static void updateSalesmanForSales(final List<Sale> sales, final List<Salesman> salesmen) {
 
-        for (final Sale sale : sales) {
-            final Salesman currentSalesman = sale.getSalesman();
-
-            final Salesman salesman = salesmen.stream()
-                    .filter(s -> s.getName().equalsIgnoreCase(currentSalesman.getName()))
-                    .findFirst()
-                    .orElse(currentSalesman);
-
-            salesman.addTotalSales(sale.getTotal());
-
-            sale.setSalesman(salesman);
-        }
+        for (final Sale sale : sales)
+            for (final Salesman salesman : salesmen)
+                if (sale.getSalesman().getName().equalsIgnoreCase(salesman.getName())) {
+                    salesman.addTotalSales(sale.getTotal());
+                    sale.setSalesman(salesman);
+                }
     }
 
 }

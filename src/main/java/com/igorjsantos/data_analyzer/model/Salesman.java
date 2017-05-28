@@ -23,8 +23,8 @@ public class Salesman {
         this.name = name;
     }
 
-    public void addTotalSales(final Double totalSale) {
-        totalSales += totalSale;
+    public void addTotalSales(final Double saleTotal) {
+        totalSales += saleTotal;
     }
 
     /**

@@ -39,7 +39,7 @@ public final class DataFileParser {
             final Pattern p = Pattern.compile(DEFAULT_DELIMITER, Pattern.CANON_EQ);
 
             return lines.filter(filter)
-                    .map(line -> p.split(line))
+                    .map(line -> p.split(line.trim()))
                     .map(mapper).collect(toList());
         }
         catch (final IOException e) {

@@ -1,7 +1,6 @@
 package com.igorjsantos.data_analyzer.business;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
@@ -14,9 +13,9 @@ import com.igorjsantos.data_analyzer.model.Salesman;
 
 public final class AnalyzerServiceImpl implements AnalyzerService {
 
-    private static final FileService fileService = new FileServiceImpl();
+    private final FileService fileService = new FileServiceImpl();
 
-    private static final DataService dataService = new DataServiceImpl();
+    private final DataService dataService = new DataServiceImpl();
 
     @Override
     public void init() {
@@ -47,8 +46,10 @@ public final class AnalyzerServiceImpl implements AnalyzerService {
                 final WatchEvent<Path> ev = (WatchEvent<Path>) event;
 
                 if (fileService.isValidWatchEvent(ev.kind())) {
-                    final Path path = Paths.get(inputPath.toString(), ev.context().toString());
-                    onFileEvent(path);
+                    final Path path = inputPath.resolve(ev.context());
+
+                    if (fileService.isValidPath(path))
+                        onFileEvent(path);
                 }
             }
 
@@ -58,9 +59,6 @@ public final class AnalyzerServiceImpl implements AnalyzerService {
     }
 
     private void onFileEvent(final Path filename) {
-
-        if (!fileService.isValidPath(filename))
-            return;
 
         final DataFileDTO extractedData = dataService.extractData(filename);
 
@@ -72,11 +70,9 @@ public final class AnalyzerServiceImpl implements AnalyzerService {
         final DataResultsDTO results = new DataResultsDTO();
 
         results.setClientsAmount(data.getCustomers().size());
-
         results.setSalesmanAmount(data.getSalesmen().size());
 
         results.setMostExpensiveSale(analyzeMostExpensiveSale(data));
-
         results.setWorstSalesmanEver(analyzeWorstSalesmanEver(data));
 
         return results;
@@ -86,12 +82,9 @@ public final class AnalyzerServiceImpl implements AnalyzerService {
 
         Sale mostExpensiveSale = data.getSales().iterator().next();
 
-        for (final Sale sale : data.getSales()) {
-            if (mostExpensiveSale.getTotal() > sale.getTotal())
+        for (final Sale sale : data.getSales())
+            if (mostExpensiveSale.getTotal() < sale.getTotal())
                 mostExpensiveSale = sale;
-
-            sale.getSalesman().addTotalSales(sale.getTotal());
-        }
 
         return mostExpensiveSale;
     }
