@@ -12,9 +12,9 @@ import lombok.Setter;
 @NoArgsConstructor
 public class DataResultsDTO {
 
-    private Long clientsAmount;
+    private Integer clientsAmount;
 
-    private Long salesmanAmount;
+    private Integer salesmanAmount;
 
     private Sale mostExpensiveSale;
 
@@ -25,9 +25,20 @@ public class DataResultsDTO {
         final StringBuilder output = new StringBuilder();
 
         output.append(String.format("Amount of clients: %s", clientsAmount));
+
+        output.append(System.lineSeparator());
+
         output.append(String.format("Amount of salesman: %s", clientsAmount));
+
+        output.append(System.lineSeparator());
+
         output.append(String.format("ID of the most expensive sale: %s", mostExpensiveSale.getId()));
+
+        output.append(System.lineSeparator());
+
         output.append(String.format("Worst salesman ever: %s", worstSalesmanEver.getName()));
+
+        output.append(System.lineSeparator());
 
         return output.toString();
     }

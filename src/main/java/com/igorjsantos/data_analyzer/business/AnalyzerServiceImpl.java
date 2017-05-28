@@ -1,9 +1,7 @@
 package com.igorjsantos.data_analyzer.business;
 
-import java.io.IOException;
-import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.Paths;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
@@ -11,7 +9,8 @@ import java.nio.file.WatchService;
 import com.igorjsantos.data_analyzer.config.ApplicationConfig;
 import com.igorjsantos.data_analyzer.dto.DataFileDTO;
 import com.igorjsantos.data_analyzer.dto.DataResultsDTO;
-import com.igorjsantos.data_analyzer.exception.ApplicationException;
+import com.igorjsantos.data_analyzer.model.Sale;
+import com.igorjsantos.data_analyzer.model.Salesman;
 
 public final class AnalyzerServiceImpl implements AnalyzerService {
 
@@ -22,82 +21,89 @@ public final class AnalyzerServiceImpl implements AnalyzerService {
     @Override
     public void init() {
 
-        registerAnalyzer();
+        analyzeDataFiles();
     }
 
-    public void registerAnalyzer() {
+    @SuppressWarnings("unchecked")
+    public void analyzeDataFiles() {
 
-        try {
-            final WatchService watcher = FileSystems.getDefault().newWatchService();
+        final Path inputPath = ApplicationConfig.getInputFolder();
 
-            ApplicationConfig.getInputFolder()
-                    .register(watcher, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_MODIFY);
+        final WatchService watcher = fileService.watch(inputPath);
 
-            while (true) {
+        WatchKey key;
 
-                WatchKey key;
+        while (true) {
 
-                try {
-                    key = watcher.take();
-                }
-                catch (final InterruptedException e) {
-                    return;
-                }
-
-                for (final WatchEvent<?> event : key.pollEvents()) {
-
-                    @SuppressWarnings("unchecked")
-                    final WatchEvent<Path> ev = (WatchEvent<Path>) event;
-
-                    if (event.kind() == StandardWatchEventKinds.ENTRY_CREATE ||
-                            event.kind() == StandardWatchEventKinds.ENTRY_MODIFY)
-                        onFileEvent(ev.context());
-                }
-
-                if (!key.reset())
-                    break;
+            try {
+                key = watcher.take();
             }
-        }
-        catch (final IOException e) {
-            throw new ApplicationException("An error occurs when trying to register a whatcher");
-        }
+            catch (final InterruptedException e) {
+                return;
+            }
 
+            for (final WatchEvent<?> event : key.pollEvents()) {
+
+                final WatchEvent<Path> ev = (WatchEvent<Path>) event;
+
+                if (fileService.isValidWatchEvent(ev.kind())) {
+                    final Path path = Paths.get(inputPath.toString(), ev.context().toString());
+                    onFileEvent(path);
+                }
+            }
+
+            if (!key.reset())
+                break;
+        }
     }
 
-    private void onFileEvent(final Path context) {
+    private void onFileEvent(final Path filename) {
 
-        if (!fileService.isValid(context))
+        if (!fileService.isValidPath(filename))
             return;
 
-        final DataFileDTO extractedData = dataService.extractData(context);
+        final DataFileDTO extractedData = dataService.extractData(filename);
 
-        fileService.saveToFile(context, analyzeData(extractedData));
+        fileService.saveToFile(filename, analyzeData(extractedData));
     }
 
     private DataResultsDTO analyzeData(final DataFileDTO data) {
 
         final DataResultsDTO results = new DataResultsDTO();
 
-        results.setClientsAmount(data.getCustomers().count());
+        results.setClientsAmount(data.getCustomers().size());
 
-        results.setSalesmanAmount(data.getSalesmen().count());
+        results.setSalesmanAmount(data.getSalesmen().size());
 
-        results.setMostExpensiveSale(data.getSales().iterator().next());
+        results.setMostExpensiveSale(analyzeMostExpensiveSale(data));
 
-        data.getSales().forEach(sale -> {
-            if (results.getMostExpensiveSale().getTotal() > sale.getTotal())
-                results.setMostExpensiveSale(sale);
-
-            sale.getSalesman().addTotalSales(sale.getTotal());
-        });
-
-        results.setWorstSalesmanEver(data.getSalesmen().iterator().next());
-
-        data.getSalesmen().forEach(salesman -> {
-            if (results.getWorstSalesmanEver().getTotalSales() < salesman.getTotalSales())
-                results.setWorstSalesmanEver(salesman);
-        });
+        results.setWorstSalesmanEver(analyzeWorstSalesmanEver(data));
 
         return results;
+    }
+
+    private static Sale analyzeMostExpensiveSale(final DataFileDTO data) {
+
+        Sale mostExpensiveSale = data.getSales().iterator().next();
+
+        for (final Sale sale : data.getSales()) {
+            if (mostExpensiveSale.getTotal() > sale.getTotal())
+                mostExpensiveSale = sale;
+
+            sale.getSalesman().addTotalSales(sale.getTotal());
+        }
+
+        return mostExpensiveSale;
+    }
+
+    private static Salesman analyzeWorstSalesmanEver(final DataFileDTO data) {
+
+        Salesman worstSalesmanEver = data.getSalesmen().iterator().next();
+
+        for (final Salesman salesman : data.getSalesmen())
+            if (worstSalesmanEver.getTotalSales() > salesman.getTotalSales())
+                worstSalesmanEver = salesman;
+
+        return worstSalesmanEver;
     }
 }

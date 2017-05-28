@@ -27,9 +27,9 @@ public class SaleItem {
     public static SaleItem fromArray(final String[] line) {
         final SaleItem customer = new SaleItem();
 
-        customer.setId(Long.parseLong(line[1]));
-        customer.setQuantity(Integer.parseInt(line[2]));
-        customer.setPrice(Double.parseDouble(line[3]));
+        customer.setId(Long.parseLong(line[0]));
+        customer.setQuantity(Integer.parseInt(line[1]));
+        customer.setPrice(Double.parseDouble(line[2]));
 
         return customer;
     }

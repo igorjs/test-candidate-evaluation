@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ApplicationConfig {
 
-    private static final String[] ALLOWED_EXTENSIONS = { ".txt" };
+    private static final String[] ALLOWED_EXTENSIONS = { "dat", "txt" };
     private static final String BASE_PATH = System.getProperty("user.home");
 
     public static List<String> getAllowedExtensions() {

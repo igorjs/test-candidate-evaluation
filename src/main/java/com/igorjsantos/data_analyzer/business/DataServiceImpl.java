@@ -1,7 +1,7 @@
 package com.igorjsantos.data_analyzer.business;
 
 import java.nio.file.Path;
-import java.util.stream.Stream;
+import java.util.List;
 
 import com.igorjsantos.data_analyzer.dto.DataFileDTO;
 import com.igorjsantos.data_analyzer.model.Customer;
@@ -16,24 +16,29 @@ public class DataServiceImpl implements DataService {
 
         DataFileParser.setup(filename);
 
-        final Stream<Customer> customers = DataFileParser.parseCustomers();
+        final List<Customer> customers = DataFileParser.parseCustomers();
+        final List<Salesman> salesmen = DataFileParser.parseSalesman();
+        final List<Sale> sales = DataFileParser.parseSales();
 
-        final Stream<Salesman> salesmen = DataFileParser.parseSalesman();
+        updateSalesmanForSales(sales, salesmen);
 
-        final Stream<Sale> sales = DataFileParser.parseSales();
+        return new DataFileDTO(customers, salesmen, sales);
+    }
 
-        sales.forEach(sale -> {
-            final String salemanName = sale.getSalesman().getName();
+    private static void updateSalesmanForSales(final List<Sale> sales, final List<Salesman> salesmen) {
 
-            final Salesman salesman = salesmen.filter(s -> s.getName().equalsIgnoreCase(salemanName))
-                    .findFirst().get();
+        for (final Sale sale : sales) {
+            final Salesman currentSalesman = sale.getSalesman();
+
+            final Salesman salesman = salesmen.stream()
+                    .filter(s -> s.getName().equalsIgnoreCase(currentSalesman.getName()))
+                    .findFirst()
+                    .orElse(currentSalesman);
 
             salesman.addTotalSales(sale.getTotal());
 
             sale.setSalesman(salesman);
-        });
-
-        return new DataFileDTO(customers, salesmen, sales);
+        }
     }
 
 }

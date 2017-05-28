@@ -1,6 +1,6 @@
 package com.igorjsantos.data_analyzer.dto;
 
-import java.util.stream.Stream;
+import java.util.List;
 
 import com.igorjsantos.data_analyzer.model.Customer;
 import com.igorjsantos.data_analyzer.model.Sale;
@@ -13,9 +13,9 @@ import lombok.Getter;
 @AllArgsConstructor
 public class DataFileDTO {
 
-    private final Stream<Customer> customers;
+    private final List<Customer> customers;
 
-    private final Stream<Salesman> salesmen;
+    private final List<Salesman> salesmen;
 
-    private final Stream<Sale> sales;
+    private final List<Sale> sales;
 }
