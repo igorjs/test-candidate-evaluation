@@ -31,7 +31,7 @@ Sales data has the format id 003. Inside the sales row, there is the list of ite
 
 ```
 003çSaleIDç[ItemID-ItemQuantity-ItemPrice]çSalesmanname
-````
+```
 
 ### Sample file data
 
